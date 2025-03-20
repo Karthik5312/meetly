@@ -36,7 +36,9 @@ const MeetingRoom = () => {
 
   const [isRecording, setIsRecording] = useState(false);
   const mediaRecorder = useRef<MediaRecorder | null>(null);
-  const recordedChunks = useRef<BlobPart[]>([]);
+  //const recordedChunks = useRef<BlobPart[]>([]);
+  const recordedChunks = useRef<Blob[]>([]);
+
 
   if (callingState !== CallingState.JOINED) return <Loader />;
 
@@ -78,12 +80,19 @@ const MeetingRoom = () => {
   
       // Initialize MediaRecorder
       mediaRecorder.current = new MediaRecorder(combinedStream, { mimeType: 'video/webm' });
-  
+      /*
       mediaRecorder.current.ondataavailable = (event) => {
         if (event.data.size > 0) {
           recordedChunks.current.push(event.data);
         }
+      };*/
+
+      mediaRecorder.current.ondataavailable = (event) => {
+        if (event.data.size > 0) {
+          recordedChunks.current.push(new Blob([event.data], { type: 'video/webm' }));
+        }
       };
+      
   
       mediaRecorder.current.onstop = saveRecordingToFile;
       mediaRecorder.current.start();
